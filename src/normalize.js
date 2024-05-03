@@ -20,7 +20,7 @@
 'use strict';
 
 const validEnvVarName = /[a-zA-Z_]+\w*/;
-
+const missingArgs = /\$\w+|%\w+%/;
 
 /**
  * NOTE: So while the names may be valid, your shell might not support anything besides letters, numbers, and underscores.
@@ -44,7 +44,9 @@ const normalize = (commandArgs, envVariables) => {
       return (str) => str.replace(argPattern, argValue);
     });
 
-  return commandArgs.map((commandArg) => envVars.reduce((arg, replacer) => replacer(arg), commandArg));
+  return commandArgs
+    .map((commandArg) => envVars.reduce((arg, replacer) => replacer(arg), commandArg).replace(missingArgs, ''))
+    .filter((commandArg) => commandArg);
 };
 
 export { normalize };
