@@ -1,36 +1,25 @@
 #!/usr/bin/env node --harmony
 
-import { spawn } from "cross-spawn";
 import { exec } from "child_process";
-import exit from 'exit';
+import { spawn } from "cross-spawn";
+import exit from "exit";
+import { normalize } from "./normalize";
 
-function normalize( args, isWindows ) {
-    return args.map( arg => {
-        Object.keys( process.env )
-            .sort( ( x, y ) => y.length - y.length ) // NOTE: sort by descending length to prevent partial replacement
-            .forEach( key => {
-                const regex = new RegExp( `\\$${ key }|%${ key }%`, "ig" );
-                arg = arg.replace( regex, process.env[ key ] );
-            } );
-        return arg;
-    } )
-}
-
-let args = process.argv.slice( 2 );
-if ( args.length === 1 ) {
-    const [ command ] = normalize( args );
-    const proc = exec( command, ( error, stdout, stderr ) => {
-        if ( error ) {
-            console.error( `exec error: ${ error }` );
-            return;
-        }
-        process.stdout.write( stdout );
-        process.stderr.write( stderr );
-        exit(proc.code);
-    });
+let args = process.argv.slice(2);
+if (args.length === 1) {
+  const [command] = normalize(args);
+  const proc = exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec error: ${error}`);
+      return;
+    }
+    process.stdout.write(stdout);
+    process.stderr.write(stderr);
+    exit(proc.code);
+  });
 } else {
-    args = normalize( args );
-    const command = args.shift();
-    const proc = spawn.sync( command, args, { stdio: "inherit" } );
-    exit(proc.status);
+  args = normalize(args);
+  const command = args.shift();
+  const proc = spawn.sync(command, args, { stdio: "inherit" });
+  exit(proc.status);
 }
