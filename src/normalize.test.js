@@ -27,7 +27,7 @@ const commandToArgs = (command) => (command ?? '').split(' ');
 describe('normalize', () => {
   describe('replace different type of arguments', () => {
     it('should replace unix like argument', () => {
-      const commandArgument = commandToArgs(`argument=$UNIX_ARG`);
+      const commandArgument = commandToArgs('argument=$UNIX_ARG');
       const env = { UNIX_ARG: 'unix_arg_value' };
 
       const [normalizedArgument] = normalize(commandArgument, env);
@@ -35,18 +35,26 @@ describe('normalize', () => {
     });
 
     it('should replace windows like argument', () => {
-      const commandArgument = commandToArgs(`argument=%WINDOWS_ARG%`);
+      const commandArgument = commandToArgs('argument=%WINDOWS_ARG%');
       const env = { WINDOWS_ARG: 'windows_arg_value' };
 
       const [normalizedArgument] = normalize(commandArgument, env);
       expect(normalizedArgument).toBe('argument=windows_arg_value');
     });
+
+    it('should replace interpolation like argument', () => {
+      const commandArgument = commandToArgs('argument=${ENV_VAR}');
+      const env = { ENV_VAR: 'interpolation_arg_value' };
+
+      const [normalizedArgument] = normalize(commandArgument, env);
+      expect(normalizedArgument).toBe('argument=interpolation_arg_value');
+    });
   });
 
   describe('skip missing arguments', () => {
     const commands = [
-      { command: `first=$FIRST second=$SECOND third=$THIRD`, env: { FIRST: '1', THIRD: '3' }, result: ['first=1', 'second=', 'third=3'] },
-      { command: `first=$FIRST second $SECOND third=$THIRD`, env: { FIRST: '1', THIRD: '3' }, result: ['first=1', 'second', 'third=3'] },
+      { command: 'first=$FIRST second=$SECOND third=$THIRD', env: { FIRST: '1', THIRD: '3' }, result: ['first=1', 'second=', 'third=3'] },
+      { command: 'first=$FIRST second $SECOND third=$THIRD', env: { FIRST: '1', THIRD: '3' }, result: ['first=1', 'second', 'third=3'] },
     ];
 
     it.each(commands)('should cleanup missing variables', ({ command, env, result }) => {
@@ -56,7 +64,7 @@ describe('normalize', () => {
   });
 
   it('should prevent partial replacement', () => {
-    const commandArgument = commandToArgs(`aaa=$AAA aa=$AA a=$A`);
+    const commandArgument = commandToArgs('aaa=$AAA aa=$AA a=$A');
     const env = {
       A: 'a_arg_value',
       AA: 'aa_arg_value',
