@@ -7,7 +7,7 @@ import { normalize } from "./normalize";
 
 let args = process.argv.slice(2);
 if (args.length === 1) {
-  const [command] = normalize(args);
+  const [command] = normalize(args, process.env);
   const proc = exec(command, (error, stdout, stderr) => {
     if (error) {
       console.error(`exec error: ${error}`);
