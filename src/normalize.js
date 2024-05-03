@@ -19,17 +19,32 @@
  */
 'use strict';
 
-const normalize = (args, envVariables) => {
-  return args.map(arg => {
-    Object.keys(envVariables)
-      // NOTE: sort by descending length to prevent partial replacement
-      .sort((x, y) => y.length - x.length)
-      .forEach(key => {
-        const regex = new RegExp(`\\$${key}|%${key}%`, 'ig');
-        arg = arg.replace(regex, envVariables[key]);
-      });
-    return arg;
-  });
+const validEnvVarName = /[a-zA-Z_]+\w*/;
+
+
+/**
+ * NOTE: So while the names may be valid, your shell might not support anything besides letters, numbers, and underscores.
+ * See details:
+ *  https://stackoverflow.com/q/2821043/3047033
+ *  https://pubs.opengroup.org/onlinepubs/000095399/basedefs/xbd_chap08.html
+ *
+ * NOTE:
+ *    - sort by descending length to prevent partial replacement
+ *    - skip not valid env variables
+ *    - inline variable values
+ *    - clean up at the end missing variables
+ **/
+const normalize = (commandArgs, envVariables) => {
+  const envVars = Object.keys(envVariables)
+    .filter((key) => validEnvVarName.test(key))
+    .sort((x, y) => y.length - x.length)
+    .map((key) => {
+      const argPattern = new RegExp(`\\$${key}|%${key}%`, 'gi');
+      const argValue = envVariables[key];
+      return (str) => str.replace(argPattern, argValue);
+    });
+
+  return commandArgs.map((commandArg) => envVars.reduce((arg, replacer) => replacer(arg), commandArg));
 };
 
 export { normalize };
