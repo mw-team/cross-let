@@ -34,7 +34,7 @@ const missingArgs = /\$\w+|%\w+%|\$\{\w+\}/;
  *    - inline variable values
  *    - clean up at the end missing variables
  **/
-const normalize = (commandArgs, envVariables) => {
+const normalize = (commandArgs, envVariables = process.env) => {
   const envVars = Object.keys(envVariables)
     .filter((key) => validEnvVarName.test(key))
     .sort((x, y) => y.length - x.length)
