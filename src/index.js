@@ -1,9 +1,10 @@
 #!/usr/bin/env node --harmony
+'use strict';
 
-import { exec } from "child_process";
-import { spawn } from "cross-spawn";
-import exit from "exit";
-import { normalize } from "./normalize";
+import { exec } from 'child_process';
+import { spawn } from 'cross-spawn';
+import exit from 'exit';
+import { normalize } from './normalize';
 
 let args = process.argv.slice(2);
 if (args.length === 1) {
@@ -20,6 +21,6 @@ if (args.length === 1) {
 } else {
   args = normalize(args);
   const command = args.shift();
-  const proc = spawn.sync(command, args, { stdio: "inherit" });
+  const proc = spawn.sync(command, args, { stdio: 'inherit' });
   exit(proc.status);
 }
